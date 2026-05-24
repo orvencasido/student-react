@@ -1,0 +1,127 @@
+/* Reading Review / Messages Specific Styles */
+.reading-review-card {
+  border-radius: 24px;
+  border: 4px solid rgba(255, 255, 255, 0.6);
+}
+
+.review-meta {
+  font-size: 1.05rem;
+  color: #2c3e50;
+  border-left: 5px solid var(--bg-primary-blue);
+  padding-left: 12px;
+}
+
+.review-title {
+  font-size: 2.2rem;
+  color: #1b3a4b;
+}
+
+.review-subtitle {
+  font-size: 1.5rem;
+  color: var(--bg-primary-blue);
+}
+
+.story-text-container {
+  border: 2px solid #E2EFE7;
+  overflow-y: auto;
+  max-height: 380px;
+}
+
+.story-passage {
+  font-family: var(--font-kids-body);
+  user-select: none;
+}
+
+/* Color Coded Interactive Word Groups */
+.word-group {
+  display: inline-block;
+  padding: 1px 4px;
+  margin: 1px 0;
+  border-radius: 6px;
+  cursor: help;
+  font-weight: 700;
+
+  position: relative;
+}
+
+.word-group:hover {
+  /* No animation */
+}
+
+.word-jump {
+  color: var(--color-jump);
+  border-bottom: 2px dashed var(--color-jump);
+  background-color: rgba(229, 57, 53, 0.06);
+}
+
+.word-repetition {
+  color: var(--color-repetition);
+  border-bottom: 2px dashed var(--color-repetition);
+  background-color: rgba(245, 124, 0, 0.06);
+}
+
+.word-self-correct {
+  color: var(--color-self-correct);
+  border-bottom: 2px dashed var(--color-self-correct);
+  background-color: rgba(46, 125, 50, 0.06);
+}
+
+.word-mispronounce {
+  color: var(--color-mispronounce);
+  border-bottom: 2px dashed var(--color-mispronounce);
+  background-color: rgba(245, 176, 0, 0.06);
+}
+
+/* Teacher Report Stats Grid */
+.report-stat-card {
+  background-color: #ffffff;
+  border-width: 3px !important;
+  border-style: solid !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.border-green { border-color: var(--stat-vocab-green) !important; }
+.border-orange { border-color: var(--color-repetition) !important; }
+.border-teal { border-color: #008080 !important; }
+.border-gold { border-color: var(--bg-hover-blue) !important; }
+
+.stat-label {
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+}
+
+/* Feedback panel */
+.teacher-feedback-card {
+  border-radius: 24px;
+  border: 4px solid rgba(255, 255, 255, 0.6);
+}
+
+.feedback-title {
+  font-size: 1.6rem;
+  color: #1b3a4b;
+  border-bottom: 2px solid #f1f2f6;
+  padding-bottom: 8px;
+}
+
+/* Speech Word Popover Tooltip Box */
+.word-tooltip {
+  position: absolute;
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  z-index: 1000;
+  width: 230px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.word-tooltip .tooltip-arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border-left: 2px solid #e0e0e0;
+  border-top: 2px solid #e0e0e0;
+  transform: rotate(45deg);
+  top: -7px;
+  left: 20px;
+}

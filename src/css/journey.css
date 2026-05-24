@@ -1,0 +1,26 @@
+/* Journey Page - Simple Stat Pills */
+.journey-stats-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+
+.stat-pill {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 60px;
+  padding: 24px 40px;
+}
+
+.stat-label {
+  font-family: 'Fredoka', 'Quicksand', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.stat-value {
+  font-family: 'Fredoka', 'Quicksand', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #10D070;
+}

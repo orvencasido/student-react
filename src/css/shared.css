@@ -1,0 +1,248 @@
+/* Global Theme & Typography */
+:root {
+  --font-kids-head: 'Fredoka', 'Quicksand', sans-serif;
+  --font-kids-body: 'Quicksand', sans-serif;
+
+  /* Palette colors matching mockups */
+  --bg-primary-blue: #427EF5;
+  --bg-hover-blue: #70A0FF;
+  --bg-active-green: #10D070;
+  --bg-agree-green: #0CD173;
+  --bg-disagree-beige: #D9D9DE;
+  --btn-quest-purple: #5D75F5;
+
+  /* Stats colors */
+  --stat-reading-pink: #E9828A;
+  --stat-vocab-green: #4CD895;
+  --stat-word-blue: #6EC5FF;
+  --stat-comp-yellow: #FBE16B;
+
+  /* Review colors */
+  --color-jump: #E53935;
+  --color-repetition: #F57C00;
+  --color-self-correct: #2E7D32;
+  --color-mispronounce: #F5B000;
+}
+
+body {
+  font-family: var(--font-kids-body);
+  background-image: url('/src/assets/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  color: #333333;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-bold {
+  font-family: var(--font-kids-head);
+  font-weight: 700;
+}
+
+.tracking-wider {
+  letter-spacing: 0.15em;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(66, 126, 245, 0.4);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(66, 126, 245, 0.6);
+}
+
+/* Common Layout Components */
+.page-container {
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Kid-Friendly Inputs */
+.kid-input {
+  background-color: #F6FFF8 !important;
+  border: 2px solid #E2EFE7 !important;
+  border-radius: 30px !important;
+  padding: 12px 20px !important;
+  font-size: 1.1rem;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.kid-input:focus {
+  border-color: var(--bg-hover-blue) !important;
+  box-shadow: 0 0 10px rgba(66, 126, 245, 0.2) !important;
+  background-color: #ffffff !important;
+}
+
+.input-group-text {
+  background-color: #E2EFE7 !important;
+  border: 2px solid #E2EFE7 !important;
+  border-radius: 30px 0 0 30px !important;
+  color: #666;
+}
+
+.input-group>.kid-input {
+  border-radius: 0 30px 30px 0 !important;
+}
+
+/* Portal Layout Sidebar & Main Frame */
+.portal-layout {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+}
+
+.portal-sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #4A88FF 0%, #3164C7 100%);
+  height: 100%;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  max-width: 130px;
+  height: auto;
+}
+
+.sidebar-portal-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffffff;
+  opacity: 0.9;
+  margin-top: 5px;
+}
+
+.nav-item-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-radius: 16px;
+  transition: none;
+}
+
+.nav-item-btn:hover {
+  background-color: rgba(255, 255, 255, 0.28);
+  /* No scaling */
+}
+
+.nav-item-btn.active {
+  background-color: #ffffff !important;
+  color: #3164C7 !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  /* No scaling */
+}
+
+.portal-main {
+  height: 100%;
+  overflow-y: auto;
+  padding: 30px;
+  box-sizing: border-box;
+  flex-grow: 1;
+}
+
+.portal-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive Overrides */
+@media (max-width: 991px) {
+  .portal-sidebar {
+    width: 80px;
+    padding: 10px !important;
+  }
+
+  .sidebar-portal-tag,
+  .sidebar-header {
+    display: none;
+  }
+
+  .nav-item-btn {
+    padding: 12px 5px !important;
+    text-align: center !important;
+    font-size: 0px !important;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-item-btn::before {
+    font-family: "bootstrap-icons";
+    font-size: 1.5rem;
+  }
+
+  .nav-item-btn[data-page="dashboard"]::before {
+    content: "\f2dc";
+  }
+
+  /* bi-columns-gap */
+  .nav-item-btn[data-page="journey"]::before {
+    content: "\f2ce";
+  }
+
+  /* bi-compass */
+  .nav-item-btn[data-page="messages"]::before {
+    content: "\f200";
+  }
+
+  /* bi-chat-dots */
+  .nav-item-btn[data-page="profile"]::before {
+    content: "\f4e1";
+  }
+
+  /* bi-person */
+}
+
+@media (max-width: 576px) {
+  .portal-layout {
+    flex-direction: column;
+  }
+
+  .portal-sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row !important;
+    justify-content: space-around;
+    padding: 10px !important;
+  }
+
+  .sidebar-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100%;
+    margin-bottom: 0 !important;
+    justify-content: space-around;
+  }
+
+  .nav-item-btn {
+    margin-bottom: 0 !important;
+  }
+}
