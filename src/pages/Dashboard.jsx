@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import studentIcon from '../assets/icon.png';
+import { loadDashboard } from '../lib/readBloomData';
 import '../css/shared.css';
 import '../css/dashboard.css';
 
 export default function Dashboard({ user }) {
-  const [book1Completed, setBook1Completed] = useState(false);
+  const [overview, setOverview] = useState({
+    books: [],
+    skills: [],
+    achievements: [],
+    levelText: 'LEVEL 1 READING EXPLORER',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const completed = localStorage.getItem('book1Completed') === 'true';
-    setBook1Completed(completed);
-  }, []);
+    if (!user?.id) return;
+    loadDashboard(user.id)
+      .then(setOverview)
+      .catch((error) => console.error('Unable to load dashboard', error));
+  }, [user?.id]);
 
   const firstName = user ? user.name.split(' ')[0] : 'Kai';
-  const levelText = user ? user.level : 'LEVEL 1 READING EXPLORER';
+  const levelText = overview.levelText || user?.level || 'LEVEL 1 READING EXPLORER';
 
   return (
     <div id="sub-view-dashboard" className="portal-content-wrapper">
@@ -38,49 +46,21 @@ export default function Dashboard({ user }) {
         {/* Left: Book Quests */}
         <div className="col-lg-7">
           <div className="quest-list-card p-4 shadow-sm bg-white h-100 d-flex flex-column gap-3">
-            {/* Book 1 */}
-            <div className="book-row active-book d-flex justify-content-between align-items-center p-3 rounded-4">
-              <div>
-                <h4 className="book-title mb-1">The Two Best Friends</h4>
-                <div className="book-number text-uppercase font-bold">Book 1</div>
+            {overview.books.map((book) => (
+              <div key={book.id} className={`book-row ${book.unlocked ? 'active-book' : 'locked-book'} d-flex justify-content-between align-items-center p-3 rounded-4`}>
+                <div>
+                  <h4 className={`book-title mb-1 ${book.unlocked ? '' : 'text-muted'}`}>{book.title}</h4>
+                  <div className={`book-number text-uppercase font-bold ${book.unlocked ? '' : 'text-muted'}`}>Book {book.book_number}</div>
+                </div>
+                {book.unlocked ? (
+                  <button onClick={() => navigate(`/quest/${book.id}`)} className="btn btn-start-quest font-bold py-2 px-4 rounded-pill">
+                    <i className="bi bi-stars me-1"></i> {book.status === 'completed' ? 'Re-start' : 'Start'}
+                  </button>
+                ) : (
+                  <div className="lock-icon text-muted pe-3"><i className="bi bi-lock-fill fs-4"></i></div>
+                )}
               </div>
-              <button onClick={() => navigate('/quest')} className="btn btn-start-quest font-bold py-2 px-4 rounded-pill">
-                <i className="bi bi-stars me-1"></i> {book1Completed ? 'Re-start Quest' : 'Start Quest'}
-              </button>
-            </div>
-
-            {/* Book 2 */}
-            <div className={`book-row ${book1Completed ? 'active-book' : 'locked-book'} d-flex justify-content-between align-items-center p-3 rounded-4`}>
-              <div>
-                <h4 className={`book-title mb-1 ${book1Completed ? '' : 'text-muted'}`}>The Little Red Riding Hood</h4>
-                <div className={`book-number text-uppercase font-bold ${book1Completed ? '' : 'text-muted'}`}>Book 2</div>
-              </div>
-              {book1Completed ? (
-                <button className="btn btn-start-quest font-bold py-2 px-4 rounded-pill">
-                  <i className="bi bi-stars me-1"></i> Start Quest
-                </button>
-              ) : (
-                <div className="lock-icon text-muted pe-3"><i className="bi bi-lock-fill fs-4"></i></div>
-              )}
-            </div>
-
-            {/* Book 3 */}
-            <div className="book-row locked-book d-flex justify-content-between align-items-center p-3 rounded-4">
-              <div>
-                <h4 className="book-title text-muted mb-1">The Three Little Pigs</h4>
-                <div className="book-number text-uppercase font-bold text-muted">Book 3</div>
-              </div>
-              <div className="lock-icon text-muted pe-3"><i className="bi bi-lock-fill fs-4"></i></div>
-            </div>
-
-            {/* Book 4 */}
-            <div className="book-row locked-book d-flex justify-content-between align-items-center p-3 rounded-4">
-              <div>
-                <h4 className="book-title text-muted mb-1">The Turtle and the Rabbit</h4>
-                <div className="book-number text-uppercase font-bold text-muted">Book 4</div>
-              </div>
-              <div className="lock-icon text-muted pe-3"><i className="bi bi-lock-fill fs-4"></i></div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -90,35 +70,27 @@ export default function Dashboard({ user }) {
             <div>
               <h3 className="panel-section-title mb-3">Skills Focus</h3>
               <div className="row g-3">
-                <div className="col-6">
-                  <div className="skill-box skill-reading p-3 text-center rounded-4 h-100 d-flex flex-column justify-content-center">
-                    <h4 className="skill-name mb-1">Reading</h4>
-                    <div className="skill-level text-uppercase font-bold">Level 1</div>
+                {overview.skills.map((skill) => (
+                  <div className="col-6" key={skill.name}>
+                    <div className={`skill-box skill-${skill.kind} p-3 text-center rounded-4 h-100 d-flex flex-column justify-content-center`}>
+                      <h4 className="skill-name mb-1">{skill.name}</h4>
+                      <div className="skill-level text-uppercase font-bold">Level {skill.level}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="col-6">
-                  <div className="skill-box skill-vocabulary p-3 text-center rounded-4 h-100 d-flex flex-column justify-content-center">
-                    <h4 className="skill-name mb-1">Vocabulary</h4>
-                    <div className="skill-level text-uppercase font-bold">Level 2</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
             <div>
               <h3 className="panel-section-title mb-3">Achievements</h3>
               <div className="row g-3">
-                <div className="col-6">
-                  <div className="achievement-box ach-wordmaster p-3 text-center rounded-4 h-100 d-flex flex-column justify-content-center">
-                    <h4 className="ach-name mb-1">Word Master</h4>
-                    <div className="ach-level text-uppercase font-bold">Level 2</div>
+                {overview.achievements.map((achievement) => (
+                  <div className="col-6" key={achievement.name}>
+                    <div className={`achievement-box ach-${achievement.kind} p-1 text-center rounded-4 h-100 d-flex flex-column justify-content-center`}>
+                      <h4 className="ach-name mb-1">{achievement.name}</h4>
+                      <div className="ach-level text-uppercase font-bold">Level {achievement.level}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="col-6">
-                  <div className="achievement-box ach-comp p-3 text-center rounded-4 h-100 d-flex flex-column justify-content-center">
-                    <h4 className="ach-name mb-1">Comprehension</h4>
-                    <div className="ach-level text-uppercase font-bold">Level 2</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

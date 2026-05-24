@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { savePrivacyConsent } from '../lib/readBloomData';
 import '../css/shared.css';
 import '../css/agreement.css';
 
@@ -7,18 +9,28 @@ export default function Agreement() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = localStorage.getItem('currentUser');
-    if (!user) navigate('/');
+    if (!isSupabaseConfigured) {
+      navigate('/');
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session?.user) navigate('/');
+    });
   }, [navigate]);
 
-  const handleAgree = () => {
-    localStorage.setItem('agreedToPrivacy', 'true');
+  const handleAgree = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session?.user) {
+      navigate('/');
+      return;
+    }
+    await savePrivacyConsent(data.session.user.id);
     navigate('/dashboard');
   };
 
-  const handleDisagree = () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('agreedToPrivacy');
+  const handleDisagree = async () => {
+    await supabase.auth.signOut();
     navigate('/');
   };
 

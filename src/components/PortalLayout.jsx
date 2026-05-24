@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { ensureStudentProfile } from '../lib/readBloomData';
 import '../css/shared.css';
-
-const DEFAULT_USER = {
-  name: 'Kai Adamson',
-  email: 'adamson@read.bloom',
-  section: 'Mabini',
-  grade: 'Grade 4',
-  level: 'LEVEL 1 READING EXPLORER',
-  lastLogin: '4/19/2026'
-};
 
 export default function PortalLayout({ activePage, children }) {
   const [user, setUser] = useState(null);
@@ -18,30 +11,42 @@ export default function PortalLayout({ activePage, children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = localStorage.getItem('currentUser');
-    const agreed = localStorage.getItem('agreedToPrivacy') === 'true';
-
-    if (!currentUser) {
+    if (!isSupabaseConfigured) {
       navigate('/');
       return;
     }
 
-    if (!agreed) {
-      navigate('/agreement');
-      return;
+    let mounted = true;
+
+    async function loadUser() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!data.session?.user) {
+          navigate('/');
+          return;
+        }
+
+        const profile = await ensureStudentProfile(data.session.user);
+        if (!profile.agreedToPrivacy) {
+          navigate('/agreement');
+          return;
+        }
+
+        if (mounted) setUser(profile);
+      } catch (error) {
+        await supabase.auth.signOut();
+        navigate('/');
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
 
-    try {
-      setUser(JSON.parse(currentUser));
-    } catch (e) {
-      localStorage.setItem('currentUser', JSON.stringify(DEFAULT_USER));
-      setUser(DEFAULT_USER);
-    }
-    setLoading(false);
+    loadUser();
+    return () => { mounted = false; };
   }, [navigate]);
 
   const updateUser = (updatedUser) => {
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
 

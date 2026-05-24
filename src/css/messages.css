@@ -1,7 +1,7 @@
 /* Reading Review / Messages Specific Styles */
 .reading-review-card {
   border-radius: 24px;
-  border: 4px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
 .review-meta {
@@ -44,10 +44,6 @@
   position: relative;
 }
 
-.word-group:hover {
-  /* No animation */
-}
-
 .word-jump {
   color: var(--color-jump);
   border-bottom: 2px dashed var(--color-jump);
@@ -77,17 +73,37 @@
   background-color: #ffffff;
   border-width: 3px !important;
   border-style: solid !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.border-green { border-color: var(--stat-vocab-green) !important; }
-.border-orange { border-color: var(--color-repetition) !important; }
-.border-teal { border-color: #008080 !important; }
-.border-gold { border-color: var(--bg-hover-blue) !important; }
+.border-green {
+  border-color: var(--stat-vocab-green) !important;
+}
+
+.border-orange {
+  border-color: var(--color-repetition) !important;
+}
+
+.border-teal {
+  border-color: #008080 !important;
+}
+
+.border-gold {
+  border-color: var(--bg-hover-blue) !important;
+}
 
 .stat-label {
-  font-size: 0.78rem;
-  letter-spacing: 1px;
+  font-size: 0.9rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  width: 100%;
 }
 
 /* Feedback panel */

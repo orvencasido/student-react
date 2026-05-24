@@ -1,43 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { EMPTY_QUEST, loadBookQuest, saveQuestCompletion } from '../lib/readBloomData';
 import '../css/shared.css';
 import '../css/quest.css';
 
-const QUESTIONS = [
-  {
-    exercise: 'EXERCISE 1',
-    question: 'Who are the two best friends in the Story?',
-    choices: ['Squirrel and Puppy', 'Cat and Donkey', 'Turtle and Rabbit'],
-    answer: 'Squirrel and Puppy',
-  },
-  {
-    exercise: 'EXERCISE 2',
-    question: 'Who saved the squirrel?',
-    choices: ['Puppy', 'Cat', 'Rabbit', 'Turtle'],
-    answer: 'Puppy',
-  },
-  {
-    exercise: 'EXERCISE 3',
-    question: 'Where did the squirrel fall?',
-    choices: ['In the river', 'In the rain water', 'From a tree', 'In the mud'],
-    answer: 'In the rain water',
-  },
-];
-
 export default function Quest() {
+  const { bookId } = useParams();
   const [step, setStep] = useState('camera');
+  const [quest, setQuest] = useState(EMPTY_QUEST);
+  const [loadingQuest, setLoadingQuest] = useState(true);
+  const [questError, setQuestError] = useState('');
   const [mediaStream, setMediaStream] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [shake, setShake] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
 
   const cameraPreviewRef = useRef(null);
   const readingCameraRef = useRef(null);
   const previewVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (!bookId) {
+      navigate('/dashboard');
+      return;
+    }
+
+    setLoadingQuest(true);
+    setQuestError('');
+    loadBookQuest(bookId)
+      .then((loadedQuest) => {
+        setQuest(loadedQuest);
+        if (!loadedQuest.book) {
+          setQuestError('This book is not published or does not exist in the database.');
+        } else if (!loadedQuest.content.passage_paragraphs.length || !loadedQuest.questions.length) {
+          setQuestError('This book needs reading content and quiz questions before students can start.');
+        }
+      })
+      .catch((error) => {
+        console.error('Unable to load book quest', error);
+        setQuest(EMPTY_QUEST);
+        setQuestError('Unable to load this book from the database.');
+      })
+      .finally(() => setLoadingQuest(false));
+  }, [bookId, navigate]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      navigate('/');
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session?.user) {
+        navigate('/');
+        return;
+      }
+      setCurrentUserId(data.session.user.id);
+    });
+  }, [navigate]);
 
   const initCamera = async () => {
     try {
@@ -76,19 +103,50 @@ export default function Quest() {
 
   const handleNextQuiz = () => {
     if (!selectedAnswer) { setShake(true); setTimeout(() => setShake(false), 400); return; }
-    if (selectedAnswer === QUESTIONS[currentQuestion].answer) setCorrectCount(prev => prev + 1);
+    if (selectedAnswer === quest.questions[currentQuestion].answer) setCorrectCount(prev => prev + 1);
     const next = currentQuestion + 1;
-    if (next < QUESTIONS.length) { setCurrentQuestion(next); setSelectedAnswer(null); }
+    if (next < quest.questions.length) { setCurrentQuestion(next); setSelectedAnswer(null); }
     else setStep('done');
   };
 
-  const handleTurnIn = () => {
-    localStorage.setItem('book1Completed', 'true');
-    navigate('/dashboard');
+  const handleTurnIn = async () => {
+    setSubmitError('');
+    try {
+      if (!currentUserId) throw new Error('Please log in again before turning in this quest.');
+      if (!quest.book?.id) throw new Error('This book is missing from the database.');
+      await saveQuestCompletion(currentUserId, quest.book.id, correctCount, quest.questions.length);
+      navigate('/dashboard');
+    } catch (error) {
+      setSubmitError(error.message || 'Unable to submit your quest right now.');
+    }
   };
 
-  const currentQ = QUESTIONS[currentQuestion];
-  const progressPct = (currentQuestion / QUESTIONS.length) * 100;
+  const currentQ = quest.questions[currentQuestion] || quest.questions[0];
+  const progressPct = quest.questions.length ? (currentQuestion / quest.questions.length) * 100 : 0;
+
+  if (loadingQuest) {
+    return (
+      <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (questError) {
+    return (
+      <div className="quest-container">
+        <div className="quest-bg d-flex align-items-center justify-content-center">
+          <div className="upload-modal-box text-center">
+            <h3>Book content unavailable</h3>
+            <p>{questError}</p>
+            <button onClick={() => navigate('/dashboard')} className="btn-upload-confirm">Back to Dashboard</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="quest-container">
@@ -111,7 +169,7 @@ export default function Quest() {
                 <button onClick={() => setStep('reading')} className="btn-start" id="btn-camera-start">
                   <span className="start-arrow">▶</span> START
                 </button>
-                <div className="time-hint"><strong>3 minutes</strong> to read</div>
+                <div className="time-hint"><strong>{quest.content.estimated_minutes} minutes</strong> to read</div>
               </div>
             </div>
           </div>
@@ -134,10 +192,10 @@ export default function Quest() {
                   <div className="tab-item recording-tab"><span className="rec-dot"></span> Recording</div>
                 </div>
                 <div className="passage-card">
-                  <h2 className="passage-title">THE TWO BEST FRIENDS</h2>
-                  <p>Once there were two friends a squirrel and a puppy. They used to live and play together. The squirrel was very sporty and always won the game. The puppy used to feel bad and thought that it was of no use.</p>
-                  <p>One day, it started raining heavily. The squirrel was in high spirits. He started doing antics but suddenly, lost his balance and fell in the rain water.</p>
-                  <p>He called his friend, the puppy for help. The puppy came to his rescue. The squirrel climbed on its back and reached a safe place. He thanked his friend for saving his life.</p>
+                  <h2 className="passage-title">{quest.book.title.toUpperCase()}</h2>
+                  {quest.content.passage_paragraphs.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
                 </div>
                 <div className="text-center mt-3">
                   <button onClick={() => setStep('preview')} className="btn-done" id="btn-reading-done">I'm Done</button>
@@ -199,7 +257,7 @@ export default function Quest() {
                   <div className="quiz-progress-fill" style={{ width: `${progressPct}%` }}></div>
                 </div>
                 <div className="quiz-dots">
-                  {QUESTIONS.map((_, i) => (
+                  {quest.questions.map((_, i) => (
                     <div key={i} className={`quiz-dot ${i < currentQuestion ? 'answered' : ''}`}></div>
                   ))}
                 </div>
@@ -234,15 +292,16 @@ export default function Quest() {
             <div className="done-wrapper">
               <div className="done-star">⭐</div>
               <h2 className="done-title">Great Job!</h2>
-              <p className="done-subtitle">You finished reading <strong>The Two Best Friends</strong> and answered all the questions!</p>
+              <p className="done-subtitle">You finished reading <strong>{quest.book.title}</strong> and answered all the questions!</p>
               <div className="done-score-box">
-                <span className="done-score">{correctCount}/{QUESTIONS.length}</span>
+                <span className="done-score">{correctCount}/{quest.questions.length}</span>
                 <span className="done-score-label">Correct</span>
               </div>
               <div className="done-actions">
                 <button onClick={handleStartOver} className="btn-start-over-done" id="btn-restart">↺ Start Over</button>
                 <button onClick={handleTurnIn} className="btn-turn-in" id="btn-turn-in">Turn It In 🚀</button>
               </div>
+              {submitError && <div className="alert alert-danger mt-3">{submitError}</div>}
             </div>
           </div>
         </div>

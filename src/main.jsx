@@ -19,6 +19,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/agreement" element={<Agreement />} />
         <Route path="/quest" element={<Quest />} />
+        <Route path="/quest/:bookId" element={<Quest />} />
 
         {/* Portal routes (wrapped in sidebar layout) */}
         <Route path="/dashboard" element={

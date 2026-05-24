@@ -23,9 +23,8 @@ export default function Sidebar({ activePage }) {
         {navItems.map((item) => (
           <button
             key={item.id}
-            className={`nav-item-btn w-100 text-start py-3 px-4 mb-3 border-0 ${
-              activePage === item.id ? 'active' : ''
-            }`}
+            className={`nav-item-btn w-100 text-start py-3 px-4 mb-3 border-0 ${activePage === item.id ? 'active' : ''
+              }`}
             data-page={item.id}
             onClick={() => navigate(item.path)}
           >
